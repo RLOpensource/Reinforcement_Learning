@@ -9,7 +9,7 @@ from tensorboardX import SummaryWriter
 
 class DQN:
     def __init__(self, env, max_length, state_size, output_size, hidden, n_step, batch_size,
-                    gamma, lr, train_size, update_size, activation):
+                    gamma, lr, train_size, activation):
         self.epsilon = 1.0
         self.sess = tf.Session()
         self.env = gym.make(env)
@@ -144,10 +144,10 @@ class DQN:
 
 if __name__ == '__main__':
     agent = DQN(
-        env='CartPole-v0',
+        env='MountainCar-v0',
         max_length=1e3,
-        state_size=4,
-        output_size=2,
+        state_size=2,
+        output_size=3,
         hidden=[256, 256, 256],
         n_step=10,
         batch_size=64,
