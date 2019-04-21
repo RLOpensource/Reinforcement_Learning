@@ -8,11 +8,10 @@ import buffer
 from tensorboardX import SummaryWriter
 
 class DQN:
-    def __init__(self, env, max_length, state_size, output_size, hidden, n_step, batch_size,
+    def __init__(self, max_length, state_size, output_size, hidden, n_step, batch_size,
                     gamma, lr, train_size, activation):
         self.epsilon = 1.0
         self.sess = tf.Session()
-        self.env = gym.make(env)
         self.max_length = max_length
         self.state_size = state_size
         self.output_size = output_size
@@ -25,15 +24,30 @@ class DQN:
         self.tau = 0.995
         self.activation = activation
         self.memory = buffer.replay_buffer(n_step_size=self.n_step, gamma=self.gamma, max_length=self.max_length)
-        self.x_ph, self.G_ph = \
-            model.placeholders(self.state_size, None)
+        self.state_shape = [None]
+
+        if type(self.state_size) == int:
+            self.state_shape.append(self.state_size)
+        elif type(self.state_size) == list:
+            self.state_shape.extend(self.state_size)
+
+        self.G_ph = tf.placeholder(tf.float32, shape=[None])
+        self.x_ph = tf.placeholder(tf.float32, shape=self.state_shape)
         self.a_ph = tf.placeholder(tf.int32, shape=[None])
 
-        with tf.variable_scope('main'):
-            self.main = model.dueling(self.x_ph, self.hidden, self.activation, self.output_size)
+        if type(self.state_size) == int:
+            with tf.variable_scope('main'):
+                self.main = model.dueling(self.x_ph, self.hidden, self.activation, self.output_size)
 
-        with tf.variable_scope('target'):
-            self.target = model.dueling(self.x_ph, self.hidden, self.activation, self.output_size)
+            with tf.variable_scope('target'):
+                self.target = model.dueling(self.x_ph, self.hidden, self.activation, self.output_size)
+
+        elif type(self.state_size) == list:
+            with tf.variable_scope('main'):
+                self.main = model.cnn_dueling(self.x_ph, self.hidden, self.activation, self.output_size)
+            
+            with tf.variable_scope('target'):
+                self.target = model.cnn_dueling(self.x_ph, self.hidden, self.activation, self.output_size)
 
         self.one_hot_a_ph = tf.one_hot(self.a_ph, depth=self.output_size)
         self.main_q_value = tf.reduce_sum(self.main * self.one_hot_a_ph, axis=1)
@@ -109,52 +123,7 @@ class DQN:
             q_value = self.sess.run(self.main, feed_dict={self.x_ph: [state]})
             q_value = q_value[0]
             action = np.argmax(q_value, axis=0)
+            return action, q_value[action]
         else:
             action = np.random.randint(self.output_size)
-        return action
-
-    def run(self):
-        writer = SummaryWriter()
-        for i in range(99999999):
-            self.epsilon = 1 / (i+1)
-            done = False
-            state = self.env.reset()
-            score = 0
-            step = 0
-            step_per_loss = 0
-            self.memory.n_step.reset()
-            while not done:
-                if i % 10 == 0:
-                    self.env.render()
-                step += 1
-                action = self.get_action(state, self.epsilon)
-                next_state, reward, done, _ = self.env.step(action)
-                score += reward
-                self.memory.append(state, next_state, reward, done, action)
-                state = next_state
-                if len(self.memory.memory) > self.batch_size:
-                    if step % self.train_size == 0:
-                        step_per_loss += 1
-                        loss = self.update()
-                        self.update_parameter()
-            writer.add_scalar('data/score', score, i)
-            if len(self.memory.memory) > self.batch_size:
-                writer.add_scalar('data/loss', loss/step_per_loss, i)
-            print(score, i) 
-
-if __name__ == '__main__':
-    agent = DQN(
-        env='MountainCar-v0',
-        max_length=1e3,
-        state_size=2,
-        output_size=3,
-        hidden=[256, 256, 256],
-        n_step=10,
-        batch_size=64,
-        gamma=0.99,
-        lr=0.001,
-        train_size=1,
-        activation=tf.nn.relu
-    )
-
-    agent.run()
+            return action, None

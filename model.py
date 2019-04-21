@@ -29,7 +29,6 @@ def cnn_dueling(x, hidden, activation, output_size):
     x = tf.reshape(x, [-1, 7 * 7 * 64])
     x = dueling(x, hidden, activation, output_size)
     return x
-    
 
 if __name__ == '__main__':
     x = tf.placeholder(tf.float32, shape=[None, 84, 84, 4])
