@@ -3,6 +3,28 @@ import gym
 from wrappers import make_env
 from tensorboardX import SummaryWriter
 import dqn
+import time
+
+def test(agent, env_name):
+    if env_name in ['MountainCar-v0', 'CartPole-v0']:
+        sction = 1
+        env = gym.make(env_name)
+    elif env_name in ["PongNoFrameskip-v4"]:
+        sction = 2
+        env = make_env(env_name)
+    agent.load_model('model/model')
+    while True:
+        state = env.reset()
+        done = False
+        while not done:
+            env.render()
+            action, q_value = agent.get_action(state, 0)
+            if sction == 1:
+                next_state, reward, done, _ = env.step(action)
+            elif sction == 2:
+                next_state, reward, done, _ = env.step(action+1)
+
+            state = next_state
 
 def train(agent, env_name):
     writer = SummaryWriter()
@@ -10,7 +32,7 @@ def train(agent, env_name):
     if env_name in ['MountainCar-v0', 'CartPole-v0']:
         sction = 1
         env = gym.make(env_name)
-    elif env_name in ["PongNoFrameskip-v4", "BreakoutNoFrameskip-v4"]:
+    elif env_name in ["PongNoFrameskip-v4"]:
         sction = 2
         env = make_env(env_name)
 
@@ -23,6 +45,7 @@ def train(agent, env_name):
         step_per_loss = 0
         sum_of_q_value = 0
         agent.memory.n_step.reset()
+        agent.save_model('model/model')
         while not done:
             if i % 10 == 0:
                 env.render()

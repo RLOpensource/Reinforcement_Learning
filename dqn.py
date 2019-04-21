@@ -77,6 +77,12 @@ class DQN:
         self.write_target_parameter = tf.group([tf.assign(v_targ, v_main)
                                     for v_main, v_targ in zip(self.from_list_target, self.target_params)])
 
+    def load_model(self, path):
+        self.saver.restore(self.sess, path)
+
+    def save_model(self, path):
+        self.saver.save(self.sess, path)
+
     def write_parameter(self, main_p, target_p):
         feed_dict={i:j for i, j in zip(self.from_list_main, main_p)}
         self.sess.run(self.write_main_parameter, feed_dict=feed_dict)
