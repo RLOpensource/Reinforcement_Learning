@@ -19,3 +19,8 @@
   <img src="source/pong.gif" width="49%" height='300'>
   <img src="source/pong.png" width="50%" height='300'>
 </div>
+
+# Reference
+
+* [https://github.com/haje01/distper](https://github.com/haje01/distper)
+* [https://github.com/rlcode/per](https://github.com/rlcode/per)
