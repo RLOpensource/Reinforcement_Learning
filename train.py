@@ -32,7 +32,7 @@ def train(agent, env_name):
     if env_name in ['MountainCar-v0', 'CartPole-v0']:
         sction = 1
         env = gym.make(env_name)
-    elif env_name in ["PongNoFrameskip-v4", "BreakoutNoFrameskip-v4"]:
+    elif env_name in ["PongNoFrameskip-v4"]:
         sction = 2
         env = make_env(env_name)
     
@@ -48,7 +48,6 @@ def train(agent, env_name):
         sum_of_q_value = 0
         agent.memory.n_step.reset()
         agent.save_model('model/model')
-        prev_lives = 5
         if step > 10000: step = 0
         while not done:
             step += 1
@@ -63,12 +62,7 @@ def train(agent, env_name):
             if sction == 1:
                 next_state, reward, done, info = env.step(action)
             elif sction == 2:
-                next_state, reward, done, info = env.step(action+1)
-                if env_name == "BreakoutNoFrameskip-v4":
-                    if prev_lives != info['ale.lives']:
-                        reward = -1
-                    prev_lives = info['ale.lives']
-                    
+                next_state, reward, done, info = env.step(action+1)                    
 
             score += reward
             agent.memory.append(state, next_state, reward, done, action)
