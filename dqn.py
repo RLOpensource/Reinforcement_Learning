@@ -9,7 +9,7 @@ from tensorboardX import SummaryWriter
 
 class DQN:
     def __init__(self, max_length, state_size, output_size, hidden, n_step, batch_size,
-                    gamma, lr, train_size, activation):
+                    gamma, lr, train_size, update_size, activation):
         self.epsilon = 1.0
         self.sess = tf.Session()
         self.max_length = max_length
@@ -21,6 +21,7 @@ class DQN:
         self.gamma = gamma
         self.lr = lr
         self.train_size = train_size
+        self.update_size = update_size
         self.tau = 0.995
         self.activation = activation
         self.memory = buffer.replay_buffer(n_step_size=self.n_step, gamma=self.gamma, max_length=self.max_length)
@@ -94,8 +95,8 @@ class DQN:
         return main_p, target_p
 
     def update_parameter(self):
-        #self.sess.run(self.op_holder)
-        self.sess.run(self.target_update)
+        self.sess.run(self.op_holder)
+        #self.sess.run(self.target_update)
 
     def update(self):
         sample = self.memory.get_sample(self.batch_size)
