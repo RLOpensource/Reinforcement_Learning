@@ -63,10 +63,6 @@ class DQN:
         self.per_optimizer = tf.train.AdamOptimizer(self.lr)
         self.per_train = self.per_optimizer.minimize(self.per_loss)
 
-        self.loss = tf.reduce_mean((self.G_ph - self.main_q_value) ** 2) * 0.5
-        self.optimizer = tf.train.AdamOptimizer(self.lr)
-        self.train = self.optimizer.minimize(self.loss)
-
         self.main_params = model.get_vars('main')
         self.target_params = model.get_vars('target')
 
