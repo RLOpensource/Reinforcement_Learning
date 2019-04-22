@@ -87,19 +87,19 @@ def train(agent, env_name):
         print(score, i)
 
 if __name__ == '__main__':
-    '''
+    
     env = 'MountainCar-v0'
     agent = dqn.DQN(
-        max_length=1e3,
+        max_length=1e4,
         state_size=2,
         output_size=3,
-        hidden=[256, 256, 256],
+        hidden=[256, 256],
         n_step=10,
         batch_size=64,
-        gamma=0.99,
+        gamma=0.999,
         lr=0.001,
         train_size=1,
-        update_size=40,
+        update_size=100,
         activation=tf.nn.relu
     )
     '''
@@ -117,6 +117,6 @@ if __name__ == '__main__':
         activation=tf.nn.relu,
         update_size=300
     )
-    
+    '''
     #train(agent, env)
     test(agent, env)
