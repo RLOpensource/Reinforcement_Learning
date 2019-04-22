@@ -46,9 +46,9 @@ def train(agent, env_name):
         step_per_q_value = 0
         step_per_loss = 0
         sum_of_q_value = 0
-        agent.memory.n_step.reset()
+        agent.n_step_buffer.reset()
         agent.save_model('model/model')
-        if step > 10000: step = 0
+        total_loss = 0
         while not done:
             step += 1
 
@@ -65,28 +65,28 @@ def train(agent, env_name):
                 next_state, reward, done, info = env.step(action+1)                    
 
             score += reward
-            agent.memory.append(state, next_state, reward, done, action)
+            agent.append_to_memory(state, next_state, reward, done, action)
             state = next_state
     
-            if len(agent.memory.memory) > agent.batch_size:
+            if step > agent.batch_size:
                 if step % agent.train_size == 0:
                     step_per_loss += 1
                     loss = agent.update()
+                    total_loss += loss
                 if step % agent.update_size == 0:
                     agent.update_parameter()
         writer.add_scalar('data/step', step, i)
         writer.add_scalar('data/score', score, i)
         writer.add_scalar('data/epsilon', agent.epsilon, i)
-        writer.add_scalar('data/memory_size', len(agent.memory.memory), i)
         
         if not step_per_q_value == 0:
             writer.add_scalar('data/average_of_q_value', sum_of_q_value / step_per_q_value, i)
-        if len(agent.memory.memory) > agent.batch_size:
-            writer.add_scalar('data/loss', loss/step_per_loss, i)
+        if not step_per_loss == 0:
+            writer.add_scalar('data/loss', total_loss/step_per_loss, i)
         print(score, i)
 
 if __name__ == '__main__':
-    '''
+    
     env = 'MountainCar-v0'
     agent = dqn.DQN(
         max_length=1e3,
@@ -116,5 +116,5 @@ if __name__ == '__main__':
         activation=tf.nn.relu,
         update_size=300
     )
-
+    '''
     train(agent, env)
