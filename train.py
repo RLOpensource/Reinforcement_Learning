@@ -18,6 +18,7 @@ def test(agent, env_name):
         done = False
         while not done:
             env.render()
+            time.sleep(0.01)
             action, q_value = agent.get_action(state, 0)
             if sction == 1:
                 next_state, reward, done, _ = env.step(action)
@@ -86,7 +87,7 @@ def train(agent, env_name):
         print(score, i)
 
 if __name__ == '__main__':
-    
+    '''
     env = 'MountainCar-v0'
     agent = dqn.DQN(
         max_length=1e3,
@@ -116,5 +117,6 @@ if __name__ == '__main__':
         activation=tf.nn.relu,
         update_size=300
     )
-    '''
-    train(agent, env)
+    
+    #train(agent, env)
+    test(agent, env)
