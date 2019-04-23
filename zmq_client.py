@@ -72,6 +72,20 @@ def run_client(agent, env_name, port):
             sock.send_json(memory_json)
             json.loads(sock.recv_json())
 
+            q_value_for_select_action = agent.sess.run(agent.main, feed_dict={agent.x_ph: next_state_batch})
+            selected_action = np.argmax(q_value_for_select_action, axis=1)
+            target_q_value = agent.sess.run(agent.target, feed_dict={agent.x_ph: next_state_batch})
+            target_value = [np.power(agent.gamma, agent.n_step) * q[a] * (1-int(d)) for a, q, d in zip(selected_action, target_q_value, done_batch)]
+            target = np.stack(discounted_reward_batch) + np.stack(target_value)
+
+            state_value = agent.sess.run(agent.main, feed_dict={agent.x_ph: state_batch})
+            state_value = [sv[a] for a, sv in zip(action_batch, state_value)]
+            td_error = np.abs(target - np.stack(state_value))
+
+            for i in range(agent.batch_size):
+                idx = idxs[i]
+                agent.memory.update(idx, td_error[i])
+
         if step % agent.update_size == 0:
             memory_json = json.dumps({'message': 'parameter'}, cls=NumpyEncoder)
             sock.send_json(memory_json)
