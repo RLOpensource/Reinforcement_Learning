@@ -125,6 +125,9 @@ class Memory(object):  # stored as ( s, a, r, s_ ) in SumTree
         self.tree = SumTree(capacity)
         self.capacity = capacity
 
+    def reset(self):
+        self.tree = SumTree(self.capacity)
+
     def _getPriority(self, error):
         return (error + self.e) ** self.a
 
